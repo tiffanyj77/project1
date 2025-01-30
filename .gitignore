@@ -1,0 +1,15 @@
+# Ignore venv directory
+myenv/
+
+# Ignore other python-specific files
+__pycache__/
+*.pyc 
+*.pyo 
+*.pyd
+*.db
+*.sqlite3
+
+# Ignore IDE specific files
+.vscode/
+.idea/
+
