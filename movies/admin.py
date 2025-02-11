@@ -6,4 +6,3 @@ class MovieAdmin(admin.ModelAdmin):
     search_fields = ['name']
 admin.site.register(Movie, MovieAdmin)
 admin.site.register(Review)
-##accounts/urs??
