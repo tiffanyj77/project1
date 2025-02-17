@@ -1,11 +1,9 @@
 from django.shortcuts import render
 from django.contrib.auth import login as auth_login, authenticate, logout as auth_logout
-from .forms import CustomUserCreationForm, CustomErrorList, SecurityQuestionForm
+from .forms import CustomUserCreationForm, CustomErrorList, SecurityQuestionForm, ResetPasswordForm
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from accounts.models import SecurityQuestion
-
 @login_required
 def logout(request):
     auth_logout(request)
@@ -40,30 +38,44 @@ def signup(request):
     template_data = {}
     template_data['title'] = 'Sign Up'
     if request.method == 'GET':
-        template_data['form'] = CustomUserCreationForm()
+        user_form = CustomUserCreationForm()
+        security_question_form = SecurityQuestionForm()
+        template_data['userForm'] = user_form
+        template_data['securityQuestionForm'] = security_question_form
         return render(request, 'accounts/signup.html',
             {'template_data': template_data})
     elif request.method == 'POST':
-        form = CustomUserCreationForm(request.POST, error_class=CustomErrorList)
-        if form.is_valid():
-            form.save()
-        security = SecurityQuestionForm(request.POST, error_class=CustomErrorList, initial={'text': form.fields.pop('SecurityQuestion'), 'user': form.cleaned_data['user']})
-        if security.is_valid():
-            security.save()
+        user_form = CustomUserCreationForm(request.POST, error_class=CustomErrorList)
+        security_question_form = SecurityQuestionForm(request.POST)
+
+        if user_form.is_valid() and security_question_form.is_valid():
+            user = user_form.save()
+            security_question = security_question_form.save(commit = False)
+            security_question.user = user
+            security_question.save()
             return redirect('accounts.login')
         else:
-            template_data['form'] = form
+            template_data['userForm'] = user_form
+            template_data['securityQuestionForm'] = security_question_form
             return render(request, 'accounts/signup.html',
                 {'template_data': template_data})
 
-def resetpassword(request):
-            template_data = {}
-            template_data['title'] = 'resetpassword'
-            if request.method == 'GET':
-                template_data['form'] = CustomUserCreationForm()
-                return render(request, 'accounts/signup.html',
-                              {'template_data': template_data})
-            elif request.method == 'POST':
-                form = CustomUserCreationForm(request.POST, error_class=CustomErrorList)
-                if form.is_valid():
-                    form.save()
+def reset(request):
+    template_data = {}
+    template_data['title'] = 'Reset Password'
+    if request.method == 'GET':
+        form = ResetPasswordForm()
+        template_data['form'] = form
+        return render(request, 'accounts/reset.html',
+            {'template_data': template_data})
+    elif request.method == 'POST':
+        form = ResetPasswordForm(request.POST, error_class=CustomErrorList)
+        if form.is_valid():
+            user = User.objects.get(username=form.cleaned_data['username'])
+            user.set_password(form.cleaned_data['password'])
+            user.save()
+            return redirect('accounts.login')
+        else:
+            template_data['form'] = form
+            return render(request, 'accounts/reset.html',
+                    {'template_data': template_data})

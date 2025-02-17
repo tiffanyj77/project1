@@ -1,10 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
 class SecurityQuestion(models.Model):
-    id = models.AutoField(primary_key=True)
-    text = models.CharField(max_length=255)
+    answer = models.CharField(max_length=50)
     user = models.OneToOneField(User,
-        on_delete=models.CASCADE)
+                                on_delete=models.CASCADE)
+
     def __str__(self):
-        return str(self.id) + ' - ' + self.user.username
+        return str(self.answer)
