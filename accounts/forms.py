@@ -38,7 +38,7 @@ class SecurityQuestionForm(forms.ModelForm):
 
 class ResetPasswordForm(forms.Form):
     username = forms.CharField(max_length=100)
-    password = forms.CharField(max_length=100)
+    password = forms.CharField(max_length=100, widget=forms.PasswordInput)
     securityQuestion = forms.CharField(max_length=100)
 
     def __init__(self, *args, **kwargs):
